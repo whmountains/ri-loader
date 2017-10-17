@@ -13,12 +13,13 @@ const main = async () => {
   const info = await image.metadata()
   console.log(info)
 
-  const sizes = [10, 25, 50, info.width].concat(_.range(100, info.width, 100))
-  const formats = ['jpeg', 'webp']
+  const sizes = [10, 25, 50, info.width]
+  // .concat(_.range(100, info.width, 100))
+  const formats = ['webp', 'jpeg']
 
   const queue = _.flatMap(sizes, width => {
     return formats.map(format => async () => {
-      console.log(`Resising to ${width} with ${format} format.`)
+      console.log(`Resizing to ${width} with ${format} format.`)
 
       // resize the image
       const imageBuffer = await image
@@ -27,10 +28,12 @@ const main = async () => {
         .toFormat(format)
         .toBuffer()
 
-      // read-back results
-      // const resultInfo = sharp(imageBuffer).metadata()
-
-      console.log(`Done!`)
+      try {
+        // read-back results
+        const resultInfo = await sharp(imageBuffer).metadata()
+      } catch (e) {
+        console.log(`Error resizing to ${format}@${width}w`)
+      }
     })
   })
 
