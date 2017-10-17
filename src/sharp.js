@@ -7,6 +7,8 @@ import mime from 'mime'
 const throttle = require('promise-parallel-throttle')
 
 const generateSrcsets = (images, formats) => {
+  console.log('generating srcsets', images, formats)
+
   return formats.map(format => {
     const m = mime.getType(format)
     return {
@@ -39,9 +41,11 @@ module.exports = function(input: string) {
   // run once. No point in barfing out the same image over and over.
   this.cacheable()
 
-  const emitFile = imgBuffer => {
+  const emitFile = (imgBuffer, ext) => {
     const filename = interpolateName(
-      this,
+      {
+        resourcePath: this.resourcePath.replace(/\.[^.]+$/, '.' + ext),
+      },
       options.outputDir + options.pattern,
       { content: imgBuffer },
     )
@@ -66,7 +70,7 @@ module.exports = function(input: string) {
     let counter = 0
 
     const queue = _.flatMap(sizes, width => {
-      return formats.map(format => async () => {
+      return formats.map(async format => {
         console.log(`Resising to ${width} with ${format} format.`)
         counter++
 
@@ -78,28 +82,26 @@ module.exports = function(input: string) {
           .toBuffer()
 
         // read-back results
-        const resultInfo = sharp(imageBuffer).metadata()
+        const resultInfo = await sharp(imageBuffer).metadata()
 
         // emit with webpack
-        const filename = emitFile(imageBuffer)
+        const filename = emitFile(imageBuffer, format)
 
         console.log(`Done! (${counter--} remaining.)`)
+
+        console.log(resultInfo)
 
         // return info
         return {
           mime: mime.getType(format),
-          // width: resultInfo.width,
-          // height: resultInfo.height,
+          width: resultInfo.width,
+          height: resultInfo.height,
           src: filename,
         }
       })
     })
 
-    // for (const task of queue) {
-    //   await task()
-    // }
-
-    Promise.all(queue)
+    return Promise.all(queue)
   }
   ;(async () => {
     const image = sharp(input)
@@ -109,16 +111,17 @@ module.exports = function(input: string) {
       // fallback width
       src: emitFile(
         await image
-          .resize(null, options.defaultWidth)
+          .resize(options.defaultWidth)
           .jpeg()
           .toBuffer(),
+        'jpeg',
       ),
 
       // array of images
       images,
 
       // srcset for each file type
-      // srcsets: generateSrcsets(images),
+      srcsets: generateSrcsets(images, options.formats),
     }
 
     return `
