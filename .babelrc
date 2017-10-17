@@ -1,5 +1,14 @@
 {
   "presets": [
-    "metalab"
-  ]
+    [
+      "env",
+      {
+        "targets": {
+          "node": "current"
+        }
+      }
+    ],
+    "flow"
+  ],
+  "plugins": ["transform-object-rest-spread"]
 }
