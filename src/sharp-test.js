@@ -9,12 +9,22 @@ import path from 'path'
 const pe = new PrettyError()
 
 const main = async () => {
-  const image = sharp(path.join(__dirname, '../src/seamless.jpg'))
+  const image = sharp(path.join(__dirname, '../src/condor.jpg'))
   const info = await image.metadata()
   console.log(info)
 
-  const sizes = [10, 25, 50, info.width]
-  // .concat(_.range(100, info.width, 100))
+  let sizes = []
+  if (info.width > 1000) {
+    sizes = [info.width].concat(_.range(500, info.width, 500))
+    console.log(_.range(500, info.width, 500).push(3500))
+  } else if (info.width > 500) {
+    sizes = [info.width].concat(_.range(100, info.width, 100))
+  } else {
+    sizes = [25, 50, info.width].concat(_.range(100, info.width, 50))
+  }
+
+  console.log(sizes, typeof sizes)
+
   const formats = ['webp', 'jpeg']
 
   const queue = _.flatMap(sizes, width => {

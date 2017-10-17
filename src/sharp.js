@@ -29,7 +29,7 @@ module.exports = function(input: string) {
     {
       outputDir: '',
       pattern: '[name]-[sha256:hash:base64:8].[ext]',
-      defaultWidth: 800,
+      defaultWidth: 1680,
       formats: ['webp', 'jpeg'],
     },
     getOptions(this),
@@ -53,11 +53,22 @@ module.exports = function(input: string) {
 
   const generateSizes = async (image, formats) => {
     const info = await image.metadata()
-    const sizes = [10, 25, 50, info.width].concat(_.range(100, info.width, 100))
+
+    let sizes = []
+    if (info.width > 1000) {
+      sizes = [info.width].concat(_.range(500, info.width, 500))
+    } else if (info.width > 500) {
+      sizes = [info.width].concat(_.range(100, info.width, 100))
+    } else {
+      sizes = [25, 50, info.width].concat(_.range(100, info.width, 50))
+    }
+
+    let counter = 0
 
     const queue = _.flatMap(sizes, width => {
       return formats.map(format => async () => {
         console.log(`Resising to ${width} with ${format} format.`)
+        counter++
 
         // resize the image
         const imageBuffer = await image
@@ -67,12 +78,12 @@ module.exports = function(input: string) {
           .toBuffer()
 
         // read-back results
-        // const resultInfo = sharp(imageBuffer).metadata()
+        const resultInfo = sharp(imageBuffer).metadata()
 
         // emit with webpack
         const filename = emitFile(imageBuffer)
 
-        console.log(`Done!`)
+        console.log(`Done! (${counter--} remaining.)`)
 
         // return info
         return {
@@ -84,9 +95,11 @@ module.exports = function(input: string) {
       })
     })
 
-    for (const task of queue) {
-      await task()
-    }
+    // for (const task of queue) {
+    //   await task()
+    // }
+
+    Promise.all(queue)
   }
   ;(async () => {
     const image = sharp(input)
