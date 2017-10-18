@@ -46,7 +46,7 @@ module.exports = function(input: string) {
       {
         resourcePath: this.resourcePath.replace(/\.[^.]+$/, '.' + ext),
       },
-      options.outputDir + options.pattern,
+      options.outputDir + '/' + options.pattern,
       { content: imgBuffer },
     )
 
