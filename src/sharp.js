@@ -71,7 +71,6 @@ module.exports = function(input: string) {
 
     const queue = _.flatMap(sizes, width => {
       return formats.map(async format => {
-        console.log(`Resising to ${width} with ${format} format.`)
         counter++
 
         // resize the image
@@ -87,9 +86,7 @@ module.exports = function(input: string) {
         // emit with webpack
         const filename = emitFile(imageBuffer, format)
 
-        console.log(`Done! (${counter--} remaining.)`)
-
-        console.log(resultInfo)
+        console.log(`${counter--} images remaining`)
 
         // return info
         return {
