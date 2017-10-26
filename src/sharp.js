@@ -67,6 +67,9 @@ module.exports = function(input: string) {
       sizes = [25, 50, info.width].concat(_.range(100, info.width, 50))
     }
 
+    // strip out sizes that are bigger than the source image
+    sizes.filter(s => s <= info.width)
+
     let counter = 0
 
     const queue = _.flatMap(sizes, width => {
