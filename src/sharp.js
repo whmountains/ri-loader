@@ -55,9 +55,7 @@ module.exports = function(input: string) {
     return filename
   }
 
-  const generateSizes = async (image, formats) => {
-    const info = await image.metadata()
-
+  const generateSizes = async (image, info, formats) => {
     let sizes = []
     if (info.width > 1000) {
       sizes = [info.width].concat(_.range(500, info.width, 500))
@@ -68,7 +66,7 @@ module.exports = function(input: string) {
     }
 
     // strip out sizes that are bigger than the source image
-    sizes.filter(s => s <= info.width)
+    sizes = sizes.filter(s => s <= info.width)
 
     let counter = 0
 
@@ -105,13 +103,18 @@ module.exports = function(input: string) {
   }
   ;(async () => {
     const image = sharp(input)
-    const images = (await generateSizes(image, options.formats)) || []
+    const meta = await image.metadata()
+    const images = (await generateSizes(image, meta, options.formats)) || []
+
+    console.log(
+      `fallback file to ${Math.min(options.defaultWidth, meta.width)}`,
+    )
 
     const assets = {
       // fallback width
       src: emitFile(
         await image
-          .resize(options.defaultWidth)
+          .resize(Math.min(options.defaultWidth, meta.width))
           .jpeg()
           .toBuffer(),
         'jpeg',
