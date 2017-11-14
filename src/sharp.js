@@ -5,9 +5,13 @@ import sharp from 'sharp'
 import { getOptions, interpolateName } from 'loader-utils'
 import mime from 'mime'
 const throttle = require('promise-parallel-throttle')
+const debug = require('debug')
+
+const progress = debug('ri-loader:progress')
+const dlog = debug('ri-loader:debug')
 
 const generateSrcsets = (images, formats) => {
-  console.log('generating srcsets', images, formats)
+  dlog('generating srcsets', images, formats)
 
   return formats.map(format => {
     const m = mime.getType(format)
@@ -87,7 +91,7 @@ module.exports = function(input: string) {
         // emit with webpack
         const filename = emitFile(imageBuffer, format)
 
-        console.log(`${counter--} images remaining`)
+        progress(`${counter--} images remaining`)
 
         // return info
         return {
@@ -106,9 +110,7 @@ module.exports = function(input: string) {
     const meta = await image.metadata()
     const images = (await generateSizes(image, meta, options.formats)) || []
 
-    console.log(
-      `fallback file to ${Math.min(options.defaultWidth, meta.width)}`,
-    )
+    dlog(`fallback file to ${Math.min(options.defaultWidth, meta.width)}`)
 
     const assets = {
       // fallback width

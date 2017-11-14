@@ -6,11 +6,13 @@
   "main": "dist/sharp.js",
   "dependencies": {
     "babel-preset-flow": "^6.23.0",
+    "debug": "^3.1.0",
     "loader-utils": "^1.1.0",
     "lodash": "^4.15.0",
     "mime": "^2.0.3",
     "option-multiplexer": "^0.1.0",
-    "promise-parallel-throttle": "^3.0.0"
+    "promise-parallel-throttle": "^3.0.0",
+    "supports-color": "^5.0.0"
   },
   "scripts": {
     "prepublish": "./node_modules/.bin/babel -s inline -d ./dist ./src --source-maps true",
