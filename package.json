@@ -1,8 +1,8 @@
 {
   "name": "ri-loader",
-  "version": "1.2.1",
-  "license": "CC0-1.0",
-  "repository": "izaakschroeder/sharp-loader",
+  "version": "1.2.2",
+  "license": "LGPL-3.0",
+  "repository": "whmountains/ri-loader",
   "main": "dist/sharp.js",
   "dependencies": {
     "babel-preset-flow": "^6.23.0",
